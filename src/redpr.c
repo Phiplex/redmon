@@ -255,6 +255,7 @@ print_file(char *filename, char *printer_name)
 {
 	DWORD count;
 	char *buffer;
+	char *eot = NULL;
 	FILE *f;
 	HANDLE hprinter;
 	DOC_INFO_1 dci1;
@@ -321,9 +322,11 @@ print_file(char *filename, char *printer_name)
 	}
 
 
-	while ((count = fread(buffer, 1, PRINT_BUF_SIZE, f)) != 0) {
+	while ((count = fread(buffer, 1, PRINT_BUF_SIZE, f)) != 0 && eot == NULL) {  // while input + eot (End Of Text) not found
 		if (verbose)
 			fputc('.', stdout);
+		if ((eot = memchr(buffer, 0x04, strlen(buffer))) != NULL)                // eot found ?
+			count = eot - buffer + 1;                                            // skip all after eot 
 		if (!WritePrinter(hprinter, (LPVOID)buffer, count, &written)) {
 			free(buffer);
 			fclose(f);
