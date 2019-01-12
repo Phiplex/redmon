@@ -58,7 +58,7 @@ RedPr - RED PRint
  Only use Postscript infiles.
 
  Syntax is 
-   redpr [-P"printer"] [-pport] [-b] [-h] [-v] [-h] [-v] -s|stdin|filename
+   redpr [-P"printer"] [-pport] [-b] [-h] [-v] -s|stdin|filename
      -P"printer"  Specify target printer
      -pport       Target port
      -b           Bi-directional.  Attempt to read from printer.
