@@ -53,15 +53,21 @@ RedPr - RED PRint
  If you want to use RedPr, you will need to copy it to
  a directory on your path.
 
+ This version of RedPr accepts input from stdin (-s|filename=stdin)
+ Only copy file content up to and including the first found EOT.
+ Only use Postscript infiles.
 
  Syntax is 
-   redpr [-P"printer"] [-pport] [-b] [-h] [-v] filename ...
+   redpr [-P"printer"] [-pport] [-b] [-h] [-v] -s|stdin|filename
      -P"printer"  Specify target printer
      -pport       Target port
      -b           Bi-directional.  Attempt to read from printer.
      -h           Help
      -v           Verbose.  Display debugging messages.
-
+	 -s           Input from stdin (standard input) OR 
+	 stdin        Input from stdin (standard input) OR
+	 filename     Input file|folder [incl */?]
+	 
  Printer names may be either the Windows 95/NT printer name
  such as "Apple LaserWriter II NT", or a port name such
  as "LPT1:".   If a port name is used, redpr will replace it 
