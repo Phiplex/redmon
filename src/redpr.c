@@ -54,11 +54,13 @@
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
 
 #define PRINT_BUF_SIZE 4096
 
 BOOL bidirectional = FALSE;
 BOOL verbose = FALSE;
+BOOL stdinput = FALSE;
 BOOL is_winnt = FALSE;
 
 #ifndef DI_CHANNEL
@@ -99,13 +101,15 @@ usage(void)
 	PRINTER_INFO_2 *pri2;
 	DWORD count;
 	fprintf(stdout, "RED PRint for Win32 by Ghostgum Software Pty Ltd. 1998-12-05\n");
-	fprintf(stdout, "Usage: RedPr [-P\042printer\042] [-pport] [-b] [-h] [-v] filename ...\n");
+	fprintf(stdout, "Usage: RedPr [-P\042printer\042] [-pport] [-b] [-h] [-v] -s|stdin|filename\n");
 	fprintf(stdout, "  -P\042printer\042  See below for printer names.\n");
 	fprintf(stdout, "  -pport       See below for port names.\n");
 	fprintf(stdout, "  -b           Bi-directional.  Attempt to read from printer.\n");
-
 	fprintf(stdout, "  -h           Help\n");
 	fprintf(stdout, "  -v           Verbose.  Display debugging messages.\n");
+	fprintf(stdout, "  -s           Input from stdin (standard input). OR \n");	
+	fprintf(stdout, "  stdin        Input from stdin (standard input). OR \n");	
+	fprintf(stdout, "  filename     Input file|folder [incl */?].\n");	
 	fprintf(stdout, "\n");
 	/* display list of printers */
 	if (enum_printers(&pri2, &count, TRUE))
@@ -266,8 +270,12 @@ print_file(char *filename, char *printer_name)
 
 	if ((buffer = malloc(PRINT_BUF_SIZE)) == (char *)NULL)
 		return FALSE;
-
-	if ((f = fopen(filename, "rb")) == (FILE *)NULL) {
+	
+	if (stdinput) {
+		_setmode(_fileno(stdin), _O_BINARY);
+		f = stdin;
+	}
+	else if ((f = fopen(filename, "rb")) == (FILE *)NULL) {
 		fprintf(stdout, "Can't find file \042%s\042\n", filename);
 		free(buffer);
 		return FALSE;
@@ -320,7 +328,6 @@ print_file(char *filename, char *printer_name)
 		free(buffer);
 		return FALSE;
 	}
-
 
 	while ((count = fread(buffer, 1, PRINT_BUF_SIZE, f)) != 0 && eot == NULL) {  // while input + eot (End Of Text) not found
 		if (verbose)
@@ -448,6 +455,10 @@ int main(int argc, char *argv[])
 	char **nargv;
 	DWORD version = GetVersion();
 	BOOL success = TRUE;
+
+	HANDLE hWindow = GetConsoleWindow();
+	ShowWindow(hWindow, SW_HIDE);
+
 	printer_name[0] = '\0';
 	if ((HIWORD(version) & 0x8000) == 0)
 		is_winnt = TRUE;
@@ -456,7 +467,6 @@ int main(int argc, char *argv[])
 		usage();
 		return 1;
 	}
-
 	if (nargc < 2) {
 		usage();
 		return 1;
@@ -493,6 +503,9 @@ int main(int argc, char *argv[])
 				break;
 			case 'v':
 				verbose = TRUE;
+				break;
+			case 's':
+				stdinput = TRUE;
 				break;
 			case 'P':
 			case 'p':
@@ -536,6 +549,15 @@ int main(int argc, char *argv[])
 			if (lstrlen(printer_name) == 0) {
 				fprintf(stdout, "\nNo printer selected\n");
 			}
+			else if (strcmp(nargv[i], "stdin") == 0) {
+				stdinput = TRUE;
+			}
+			else if (stdinput) {
+				usage();
+				fprintf(stdout, "\n\nBoth -s and filename %s\n", nargv[i]);
+				free(pri2);
+				return 1;
+			}
 			else {
 				HANDLE find_handle;
 				WIN32_FIND_DATA find_data;
@@ -577,6 +599,9 @@ int main(int argc, char *argv[])
 				}
 			}
 		}
+	}
+	if (stdinput) {
+		success = print_file("stdin", printer_name);
 	}
 
 	free(pri2);
