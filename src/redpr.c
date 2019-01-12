@@ -107,9 +107,9 @@ usage(void)
 	fprintf(stdout, "  -b           Bi-directional.  Attempt to read from printer.\n");
 	fprintf(stdout, "  -h           Help\n");
 	fprintf(stdout, "  -v           Verbose.  Display debugging messages.\n");
-	fprintf(stdout, "  -s           Input from stdin (standard input). OR \n");	
-	fprintf(stdout, "  stdin        Input from stdin (standard input). OR \n");	
-	fprintf(stdout, "  filename     Input file|folder [incl */?].\n");	
+	fprintf(stdout, "  -s           Input from stdin (standard input) OR \n");	
+	fprintf(stdout, "  stdin        Input from stdin (standard input) OR \n");	
+	fprintf(stdout, "  filename     Input file|folder [incl */?]\n");	
 	fprintf(stdout, "\n");
 	/* display list of printers */
 	if (enum_printers(&pri2, &count, TRUE))
